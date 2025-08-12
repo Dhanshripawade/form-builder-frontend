@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const api = "http://localhost:5000";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 export default function Builder() {
   const [title, setTitle] = useState('');
   const [headerFile, setHeaderFile] = useState(null);
   const [questions, setQuestions] = useState([]);
+   const navigate = useNavigate();
 
   function addQuestion(type) {
     setQuestions(q => [...q, { clientId: Date.now().toString(), type, title: '', options: [], image: '' }]);
@@ -17,41 +18,54 @@ export default function Builder() {
   }
 
   async function uploadFile(file) {
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch(BASE_URL + '/api/upload/single', { method: 'POST', body: fd });
-    return res.json();
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`${BASE_URL}/api/upload/single`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      alert(`❌ File upload error: ${err.message}`);
+      return {};
+    }
   }
 
   async function handleSave() {
-    let headerUrl = '';
-    if (headerFile) {
-      const r = await uploadFile(headerFile);
-      if (r?.url) headerUrl = r.url;
-    }
-
-    const questionsToSend = [];
-    for (const q of questions) {
-      let qcopy = { ...q };
-      if (q.imageFile) {
-        const r = await uploadFile(q.imageFile);
-        if (r?.url) qcopy.image = r.url;
+    try {
+      let headerUrl = '';
+      if (headerFile) {
+        const r = await uploadFile(headerFile);
+        if (r?.url) headerUrl = r.url;
       }
-      questionsToSend.push(qcopy);
-    }
 
-    const payload = { title, headerImage: headerUrl, questions: questionsToSend };
-    const res = await fetch(BASE_URL + '/api/forms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-    if (json?.form?._id) {
-      alert('✅ Form created with id ' + json.form._id);
-      window.open('/forms/' + json.form._id, '_blank');
-    } else {
-      alert('❌ Error creating form');
+      const questionsToSend = [];
+      for (const q of questions) {
+        let qcopy = { ...q };
+        if (q.imageFile) {
+          const r = await uploadFile(q.imageFile);
+          if (r?.url) qcopy.image = r.url;
+        }
+        questionsToSend.push(qcopy);
+      }
+
+      const payload = { title, headerImage: headerUrl, questions: questionsToSend };
+      const res = await fetch(`${BASE_URL}/api/forms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+
+      const json = await res.json();
+      if (json?.form?._id) {
+        alert(' Form created with id ' + json.form._id);
+        navigate(`/forms/${json.form._id}`);  
+      } else {
+        alert('❌ Error creating form');
+      }
+    } catch (err) {
+      alert(`❌ Network or server error: ${err.message}`);
     }
   }
 

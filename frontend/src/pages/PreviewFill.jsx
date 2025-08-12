@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-const api = "http://localhost:5000";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Resolve API base URL
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 export default function PreviewFill() {
   const { id } = useParams();
@@ -12,10 +12,14 @@ export default function PreviewFill() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch(BASE_URL + '/api/forms/' + id)
+    fetch(`${BASE_URL}/api/forms/${id}`)
       .then(r => r.json())
       .then(j => {
         if (j.success) setForm(j.form);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching form:", err);
         setLoading(false);
       });
   }, [id]);
@@ -25,22 +29,26 @@ export default function PreviewFill() {
   }
 
   async function handleSubmit() {
-    const payload = {
-      answers: Object.entries(answers).map(([questionClientId, answer]) => ({
-        questionClientId,
-        answer
-      }))
-    };
-    const res = await fetch(BASE_URL + '/api/forms/' + id + '/responses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const j = await res.json();
-    if (j.success) {
-      setSubmitted(true);
-    } else {
-      alert('Error submitting form');
+    try {
+      const payload = {
+        answers: Object.entries(answers).map(([questionClientId, answer]) => ({
+          questionClientId,
+          answer
+        }))
+      };
+      const res = await fetch(`${BASE_URL}/api/forms/${id}/responses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const j = await res.json();
+      if (j.success) {
+        setSubmitted(true);
+      } else {
+        alert('Error submitting form');
+      }
+    } catch (err) {
+      alert(`Network or server error: ${err.message}`);
     }
   }
 
@@ -98,7 +106,7 @@ export default function PreviewFill() {
           style={{
             height: '200px',
             maxWidth: "100%",
-            backgroundImage: `url(${api + form.headerImage})`,
+            backgroundImage: `url(${BASE_URL + form.headerImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
@@ -116,7 +124,7 @@ export default function PreviewFill() {
               <h3 className="font-semibold text-lg md:text-xl text-gray-800 mb-3">{q.title}</h3>
               {q.image && (
                 <img
-                  src={api + q.image}
+                  src={BASE_URL + q.image}
                   alt="question"
                   className="w-full max-w-sm my-3 rounded-lg shadow-md"
                 />
