@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const api = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function PreviewFill() {
   const { id } = useParams();
@@ -11,7 +12,7 @@ export default function PreviewFill() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch(api + '/api/forms/' + id)
+    fetch(BASE_URL + '/api/forms/' + id)
       .then(r => r.json())
       .then(j => {
         if (j.success) setForm(j.form);
@@ -30,7 +31,7 @@ export default function PreviewFill() {
         answer
       }))
     };
-    const res = await fetch(api + '/api/forms/' + id + '/responses', {
+    const res = await fetch(BASE_URL + '/api/forms/' + id + '/responses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

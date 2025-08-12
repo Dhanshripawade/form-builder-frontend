@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 const api = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Builder() {
   const [title, setTitle] = useState('');
@@ -18,7 +19,7 @@ export default function Builder() {
   async function uploadFile(file) {
     const fd = new FormData();
     fd.append('file', file);
-    const res = await fetch(api + '/api/upload/single', { method: 'POST', body: fd });
+    const res = await fetch(BASE_URL + '/api/upload/single', { method: 'POST', body: fd });
     return res.json();
   }
 
@@ -40,7 +41,7 @@ export default function Builder() {
     }
 
     const payload = { title, headerImage: headerUrl, questions: questionsToSend };
-    const res = await fetch(api + '/api/forms', {
+    const res = await fetch(BASE_URL + '/api/forms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -83,19 +84,19 @@ export default function Builder() {
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8">
           <button
             onClick={() => addQuestion('categorize')}
-            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-sm sm:text-base"
+            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-md sm:text-base"
           >
             ➕ Add Categorize
           </button>
           <button
             onClick={() => addQuestion('cloze')}
-            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-sm sm:text-base"
+            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-md sm:text-base"
           >
             ✏️ Add Cloze
           </button>
           <button
             onClick={() => addQuestion('comprehension')}
-            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-sm sm:text-base"
+            className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white rounded-lg shadow-lg transition-transform transform hover:scale-105 text-md sm:text-base"
           >
             📖 Add Comprehension
           </button>
@@ -190,7 +191,7 @@ export default function Builder() {
         <div className="mt-6 sm:mt-8 text-center sm:text-right">
           <button
             onClick={handleSave}
-            className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white rounded-xl shadow-lg transition-transform transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white rounded-xl shadow-lg transition-transform transform hover:scale-105 text-md sm:text-base w-full sm:w-auto"
           >
             💾 Save Form
           </button>
