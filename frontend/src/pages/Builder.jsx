@@ -62,10 +62,10 @@ export default function Builder() {
         alert(' Form created with id ' + json.form._id);
         navigate(`/forms/${json.form._id}`);  
       } else {
-        alert('❌ Error creating form');
+        alert(' Error creating form');
       }
     } catch (err) {
-      alert(`❌ Network or server error: ${err.message}`);
+      alert(` Network or server error: ${err.message}`);
     }
   }
 
